@@ -1,0 +1,77 @@
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+spring:
+  application:
+    name: resume-intelligence-platform
+  datasource:
+    hikari:
+      connectionTimeout: 20000
+      maximumPoolSize: 10
+      minimumIdle: 2
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/barun_db}
+    username: ${SPRING_DATASOURCE_USERNAME:barun}
+    password: ${SPRING_DATASOURCE_PASSWORD:barun123}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          batch_size: 25
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 25MB
+      max-request-size: 25MB
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:demo-key}
+      embedding:
+        options:
+          model: ${AI_EMBEDDING_MODEL:text-embedding-3-small}
+          dimensions: 1536
+      chat:
+        options:
+          model: ${AI_CHAT_MODEL:gpt-4o-mini}
+          temperature: 0.3
+
+# App-specific Intelligence Platform Configuration
+app:
+  ai:
+    provider: ${AI_PROVIDER:hybrid} # 'openai', 'local', or 'hybrid' (tries openai, falls back to deterministic local model)
+    local-fallback-enabled: true
+    vector-dimension: 1536
+    semantic-match-threshold: 0.65
+    related-skill-threshold: 0.50
+  security:
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized

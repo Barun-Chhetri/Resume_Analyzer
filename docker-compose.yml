@@ -1,0 +1,81 @@
+services:
+  # ==========================================
+  # PostgreSQL with PGVector Extension
+  # ==========================================
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: resume_intelligence_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-barun_db}
+      POSTGRES_USER: ${POSTGRES_USER:-barun}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-barun123}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-barun} -d ${POSTGRES_DB:-barun_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - resume_platform_net
+
+  # ==========================================
+  # Spring Boot & Spring AI Backend
+  # ==========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: resume_intelligence_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-barun_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-barun}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-barun123}
+      SPRING_FLYWAY_ENABLED: "true"
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-demo-key}
+      AI_PROVIDER: ${AI_PROVIDER:-hybrid}
+      AI_EMBEDDING_MODEL: ${AI_EMBEDDING_MODEL:-text-embedding-3-small}
+      AI_CHAT_MODEL: ${AI_CHAT_MODEL:-gpt-4o-mini}
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - resume_platform_net
+
+  # ==========================================
+  # React + Vite + Nginx Frontend
+  # ==========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: resume_intelligence_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+    networks:
+      - resume_platform_net
+
+volumes:
+  pgvector_data:
+    driver: local
+
+networks:
+  resume_platform_net:
+    driver: bridge
