@@ -147,10 +147,15 @@ Spin up PostgreSQL with PGVector, the Spring Boot backend, and the React fronten
 git clone https://github.com/barunchhetri/resume-intelligence-platform.git
 cd resume-intelligence-platform
 
-# Copy environment template
+# 1. Copy environment template to create local configuration
 cp .env.example .env
 
-# Start all services with health checks
+# 2. Configure credentials in .env:
+# Set POSTGRES_PASSWORD to a secure local password.
+# (Optional) Set OPENAI_API_KEY if you want OpenAI embeddings; otherwise the system
+# automatically uses the built-in deterministic 1536-dimensional local vector model.
+
+# 3. Start all services with health checks
 docker compose up --build
 ```
 * **Frontend UI**: [http://localhost:5173](http://localhost:5173)
@@ -161,16 +166,26 @@ docker compose up --build
 
 ### Option 2: Running Backend & Frontend Directly
 
-#### 1. Backend (Spring Boot)
+#### 1. Environment Setup
+Create your local environment file from the template:
+```bash
+cp .env.example .env
+```
+> **Security Note:** Real `.env` and `.env.*` files are excluded in `.gitignore` and must never be committed to source control.
+
+#### 2. Backend (Spring Boot)
 ```bash
 cd backend
 
-# Run with local PostgreSQL or in-memory test profile
+# Option A: Run with local PostgreSQL (reads SPRING_DATASOURCE_* from environment)
 ./mvnw clean spring-boot:run
-```
-The backend initializes on port `8080` and automatically runs Flyway migrations.
 
-#### 2. Frontend (React + Vite)
+# Option B: Run in isolated dev profile with in-memory H2 database (no external DB required)
+./mvnw clean spring-boot:run -Dspring-boot.run.profiles=dev
+```
+The backend initializes on port `8080` and automatically runs database initialization.
+
+#### 3. Frontend (React + Vite)
 ```bash
 cd frontend
 

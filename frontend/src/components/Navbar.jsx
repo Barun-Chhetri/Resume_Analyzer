@@ -104,7 +104,7 @@ const Navbar = ({ activeTab, setActiveTab, darkMode, toggleDarkMode }) => {
               color: backendOnline ? '#10b981' : '#f43f5e',
               border: `1px solid ${backendOnline ? 'rgba(16, 185, 129, 0.25)' : 'rgba(244, 63, 94, 0.25)'}`
             }}
-            title={backendOnline ? 'Backend API connected' : 'Connecting to backend at http://localhost:8080'}
+            title={backendOnline ? 'Backend API connected' : 'Backend API disconnected or connecting...'}
           >
             <span 
               style={{ 

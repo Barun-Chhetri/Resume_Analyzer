@@ -4,7 +4,7 @@
 FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /app
 
-# Copy Maven wrapper and POM first for layer caching
+# Copy Maven wrapper and POM first for layer caching.
 COPY pom.xml ./
 COPY mvnw ./
 COPY .mvn .mvn/

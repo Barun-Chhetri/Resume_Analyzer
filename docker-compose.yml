@@ -7,15 +7,15 @@ services:
     container_name: resume_intelligence_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-barun_db}
-      POSTGRES_USER: ${POSTGRES_USER:-barun}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-barun123}
+      POSTGRES_DB: ${POSTGRES_DB:-resume_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Error: POSTGRES_PASSWORD must be configured in your .env file}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - pgvector_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-barun} -d ${POSTGRES_DB:-barun_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-resume_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -36,15 +36,15 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-barun_db}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-barun}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-barun123}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-resume_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-${POSTGRES_PASSWORD:?Error: POSTGRES_PASSWORD must be configured in your .env file}}
       SPRING_FLYWAY_ENABLED: "true"
       OPENAI_API_KEY: ${OPENAI_API_KEY:-demo-key}
       AI_PROVIDER: ${AI_PROVIDER:-hybrid}
       AI_EMBEDDING_MODEL: ${AI_EMBEDDING_MODEL:-text-embedding-3-small}
       AI_CHAT_MODEL: ${AI_CHAT_MODEL:-gpt-4o-mini}
-      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173}
     ports:
       - "8080:8080"
     healthcheck:

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import axios from "axios";
+import api from "../services/api";
 import barunImage from "../assets/barun.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
@@ -28,9 +28,9 @@ const MeroinfoComponent = () => {
 
   // Fetch resume data from backend
   useEffect(() => {
-    axios.get("http://localhost:8080/api/resume")
-      .then((response) => {
-        setResume(response.data);
+    api.getLegacyResume()
+      .then((data) => {
+        setResume(data);
       })
       .catch((error) => {
         console.error("Error fetching resume:", error);
