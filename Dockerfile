@@ -4,8 +4,8 @@
 FROM node:22-slim AS frontend-builder
 WORKDIR /app/frontend
 
-COPY frontend/package*.json ./
-RUN npm install
+COPY frontend/package.json ./
+RUN npm install && npm install --save-optional @rollup/rollup-linux-x64-gnu
 
 COPY frontend/ ./
 RUN npm run build
