@@ -11,6 +11,8 @@ import java.util.UUID;
 public interface JobPostingRepository extends JpaRepository<JobPostingEntity, UUID> {
     List<JobPostingEntity> findAllByOrderByCreatedAtDesc();
     List<JobPostingEntity> findAllByUserIdOrderByCreatedAtDesc(UUID userId);
+    List<JobPostingEntity> findAllByUserIdIsNullOrderByCreatedAtDesc();
     Optional<JobPostingEntity> findByIdAndUserId(UUID id, UUID userId);
+    Optional<JobPostingEntity> findByIdAndUserIdIsNull(UUID id);
     boolean existsByIdAndUserId(UUID id, UUID userId);
 }

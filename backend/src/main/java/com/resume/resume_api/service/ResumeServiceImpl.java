@@ -42,12 +42,9 @@ public class ResumeServiceImpl implements ResumeService {
     @Transactional(readOnly = true)
     public List<ResumeDetailDTO> getAllResumes() {
         UserEntity currentUser = UserContext.getCurrentUser();
-        List<ResumeEntity> list;
-        if (currentUser != null) {
-            list = resumeRepository.findAllByUserIdOrderByCreatedAtDesc(currentUser.getId());
-        } else {
-            list = resumeRepository.findAllByOrderByCreatedAtDesc();
-        }
+        List<ResumeEntity> list = (currentUser != null)
+                ? resumeRepository.findAllByUserIdOrderByCreatedAtDesc(currentUser.getId())
+                : resumeRepository.findAllByUserIdIsNullOrderByCreatedAtDesc();
         return list.stream()
                 .map(this::mapToDetailDTO)
                 .collect(Collectors.toList());
@@ -57,14 +54,11 @@ public class ResumeServiceImpl implements ResumeService {
     @Transactional(readOnly = true)
     public ResumeDetailDTO getResumeDetailById(UUID id) {
         UserEntity currentUser = UserContext.getCurrentUser();
-        ResumeEntity entity;
-        if (currentUser != null) {
-            entity = resumeRepository.findByIdAndUserId(id, currentUser.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Resume not found with ID: " + id));
-        } else {
-            entity = resumeRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Resume not found with ID: " + id));
-        }
+        ResumeEntity entity = (currentUser != null)
+                ? resumeRepository.findByIdAndUserId(id, currentUser.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Resume not found with ID: " + id))
+                : resumeRepository.findByIdAndUserIdIsNull(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Resume not found with ID: " + id));
         return mapToDetailDTO(entity);
     }
 
@@ -72,16 +66,12 @@ public class ResumeServiceImpl implements ResumeService {
     @Transactional
     public void deleteResume(UUID id) {
         UserEntity currentUser = UserContext.getCurrentUser();
-        if (currentUser != null) {
-            ResumeEntity entity = resumeRepository.findByIdAndUserId(id, currentUser.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Resume not found with ID: " + id));
-            resumeRepository.delete(entity);
-        } else {
-            if (!resumeRepository.existsById(id)) {
-                throw new ResourceNotFoundException("Resume not found with ID: " + id);
-            }
-            resumeRepository.deleteById(id);
-        }
+        ResumeEntity entity = (currentUser != null)
+                ? resumeRepository.findByIdAndUserId(id, currentUser.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Resume not found with ID: " + id))
+                : resumeRepository.findByIdAndUserIdIsNull(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Resume not found with ID: " + id));
+        resumeRepository.delete(entity);
         log.info("Deleted Resume ID: {}", id);
     }
 

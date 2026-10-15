@@ -103,12 +103,9 @@ public class AnalysisService {
     @Transactional(readOnly = true)
     public List<AnalysisResponseDTO> getAllAnalyses() {
         UserEntity currentUser = UserContext.getCurrentUser();
-        List<AnalysisEntity> list;
-        if (currentUser != null) {
-            list = analysisRepository.findAllByUserIdOrderByCreatedAtDesc(currentUser.getId());
-        } else {
-            list = analysisRepository.findAllByOrderByCreatedAtDesc();
-        }
+        List<AnalysisEntity> list = (currentUser != null)
+                ? analysisRepository.findAllByUserIdOrderByCreatedAtDesc(currentUser.getId())
+                : analysisRepository.findAllByUserIdIsNullOrderByCreatedAtDesc();
         return list.stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
@@ -117,28 +114,22 @@ public class AnalysisService {
     @Transactional(readOnly = true)
     public AnalysisResponseDTO getAnalysisById(UUID id) {
         UserEntity currentUser = UserContext.getCurrentUser();
-        AnalysisEntity analysis;
-        if (currentUser != null) {
-            analysis = analysisRepository.findByIdAndUserId(id, currentUser.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
-        } else {
-            analysis = analysisRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
-        }
+        AnalysisEntity analysis = (currentUser != null)
+                ? analysisRepository.findByIdAndUserId(id, currentUser.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id))
+                : analysisRepository.findByIdAndUserIdIsNull(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
         return mapToDTO(analysis);
     }
 
     @Transactional(readOnly = true)
     public List<AnalysisResponseDTO.SkillMatchDTO> getAnalysisSkills(UUID id) {
         UserEntity currentUser = UserContext.getCurrentUser();
-        AnalysisEntity analysis;
-        if (currentUser != null) {
-            analysis = analysisRepository.findByIdAndUserId(id, currentUser.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
-        } else {
-            analysis = analysisRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
-        }
+        AnalysisEntity analysis = (currentUser != null)
+                ? analysisRepository.findByIdAndUserId(id, currentUser.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id))
+                : analysisRepository.findByIdAndUserIdIsNull(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
         return analysis.getSkillMatches().stream()
                 .map(this::mapMatchToDTO)
                 .collect(Collectors.toList());

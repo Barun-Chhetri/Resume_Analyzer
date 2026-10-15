@@ -11,7 +11,9 @@ import java.util.UUID;
 public interface AnalysisRepository extends JpaRepository<AnalysisEntity, UUID> {
     List<AnalysisEntity> findAllByOrderByCreatedAtDesc();
     List<AnalysisEntity> findAllByUserIdOrderByCreatedAtDesc(UUID userId);
+    List<AnalysisEntity> findAllByUserIdIsNullOrderByCreatedAtDesc();
     Optional<AnalysisEntity> findByIdAndUserId(UUID id, UUID userId);
+    Optional<AnalysisEntity> findByIdAndUserIdIsNull(UUID id);
     List<AnalysisEntity> findByResumeIdOrderByCreatedAtDesc(UUID resumeId);
     List<AnalysisEntity> findByJobPostingIdOrderByCreatedAtDesc(UUID jobId);
 }

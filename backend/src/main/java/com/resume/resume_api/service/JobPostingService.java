@@ -95,12 +95,9 @@ public class JobPostingService {
     @Transactional(readOnly = true)
     public List<JobPostingDTO> getAllJobPostings() {
         UserEntity currentUser = UserContext.getCurrentUser();
-        List<JobPostingEntity> list;
-        if (currentUser != null) {
-            list = jobPostingRepository.findAllByUserIdOrderByCreatedAtDesc(currentUser.getId());
-        } else {
-            list = jobPostingRepository.findAllByOrderByCreatedAtDesc();
-        }
+        List<JobPostingEntity> list = (currentUser != null)
+                ? jobPostingRepository.findAllByUserIdOrderByCreatedAtDesc(currentUser.getId())
+                : jobPostingRepository.findAllByUserIdIsNullOrderByCreatedAtDesc();
         return list.stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
@@ -109,30 +106,23 @@ public class JobPostingService {
     @Transactional(readOnly = true)
     public JobPostingDTO getJobPostingById(UUID id) {
         UserEntity currentUser = UserContext.getCurrentUser();
-        JobPostingEntity job;
-        if (currentUser != null) {
-            job = jobPostingRepository.findByIdAndUserId(id, currentUser.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Job posting not found with ID: " + id));
-        } else {
-            job = jobPostingRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Job posting not found with ID: " + id));
-        }
+        JobPostingEntity job = (currentUser != null)
+                ? jobPostingRepository.findByIdAndUserId(id, currentUser.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Job posting not found with ID: " + id))
+                : jobPostingRepository.findByIdAndUserIdIsNull(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Job posting not found with ID: " + id));
         return mapToDTO(job);
     }
 
     @Transactional
     public void deleteJobPosting(UUID id) {
         UserEntity currentUser = UserContext.getCurrentUser();
-        if (currentUser != null) {
-            JobPostingEntity job = jobPostingRepository.findByIdAndUserId(id, currentUser.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Job posting not found with ID: " + id));
-            jobPostingRepository.delete(job);
-        } else {
-            if (!jobPostingRepository.existsById(id)) {
-                throw new ResourceNotFoundException("Job posting not found with ID: " + id);
-            }
-            jobPostingRepository.deleteById(id);
-        }
+        JobPostingEntity job = (currentUser != null)
+                ? jobPostingRepository.findByIdAndUserId(id, currentUser.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Job posting not found with ID: " + id))
+                : jobPostingRepository.findByIdAndUserIdIsNull(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Job posting not found with ID: " + id));
+        jobPostingRepository.delete(job);
         log.info("Deleted Job Posting ID: {}", id);
     }
 

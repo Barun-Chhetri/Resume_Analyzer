@@ -11,6 +11,8 @@ import java.util.UUID;
 public interface ResumeRepository extends JpaRepository<ResumeEntity, UUID> {
     List<ResumeEntity> findAllByOrderByCreatedAtDesc();
     List<ResumeEntity> findAllByUserIdOrderByCreatedAtDesc(UUID userId);
+    List<ResumeEntity> findAllByUserIdIsNullOrderByCreatedAtDesc();
     Optional<ResumeEntity> findByIdAndUserId(UUID id, UUID userId);
+    Optional<ResumeEntity> findByIdAndUserIdIsNull(UUID id);
     boolean existsByIdAndUserId(UUID id, UUID userId);
 }

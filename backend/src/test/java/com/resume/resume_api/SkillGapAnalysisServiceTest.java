@@ -48,7 +48,7 @@ class SkillGapAnalysisServiceTest {
     @DisplayName("Should accurately partition matched skills from gaps and compute coverage percentage")
     void testGapAnalysisPartitioning() {
         ResumeEntity resume = ResumeEntity.builder()
-                .candidateName("Barun Chhetri")
+                .candidateName("Alex Morgan")
                 .rawText("Proficient in Java, Spring Boot, PostgreSQL, and Docker.")
                 .build();
 

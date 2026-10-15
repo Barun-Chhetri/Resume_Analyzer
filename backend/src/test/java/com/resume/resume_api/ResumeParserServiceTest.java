@@ -30,8 +30,8 @@ class ResumeParserServiceTest {
     @DisplayName("Should extract candidate contact info, sections, and technical skills from resume text")
     void testResumeParsing() {
         String resumeText = """
-                BARUN CHHETRI
-                Email: barun.chhetri@example.com | Phone: (555) 123-4567 | Dallas, TX
+                ALEX MORGAN
+                Email: alex.morgan@example.com | Phone: (555) 123-4567 | Dallas, TX
                 
                 SUMMARY
                 Results-driven Software Engineer with extensive experience building scalable REST APIs and microservices.
@@ -54,8 +54,8 @@ class ResumeParserServiceTest {
 
         ResumeParserService.ParsedResumeProfile profile = parser.parse(resumeText);
 
-        assertThat(profile.getCandidateName()).contains("BARUN CHHETRI");
-        assertThat(profile.getEmail()).isEqualTo("barun.chhetri@example.com");
+        assertThat(profile.getCandidateName()).contains("ALEX MORGAN");
+        assertThat(profile.getEmail()).isEqualTo("alex.morgan@example.com");
         assertThat(profile.getPhone()).isEqualTo("(555) 123-4567");
         assertThat(profile.getSections()).containsKey("SUMMARY");
         assertThat(profile.getSections()).containsKey("SKILLS");

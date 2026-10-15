@@ -51,11 +51,11 @@ class ResumeApiIntegrationTest {
     void testEndToEndWorkflow() throws Exception {
         // 1. Ingest Resume
         String resumePayload = objectMapper.writeValueAsString(Map.of(
-                "candidateName", "Barun Chhetri",
-                "filename", "barun_resume.txt",
+                "candidateName", "Alex Morgan",
+                "filename", "alex_morgan_resume.txt",
                 "rawText", """
-                        BARUN CHHETRI
-                        Software Engineer | barun.chhetri@example.com | Dallas, TX
+                        ALEX MORGAN
+                        Software Engineer | alex.morgan@example.com | Dallas, TX
                         
                         SUMMARY
                         Passionate backend software engineer building cloud-native applications with Java, Spring Boot, and PostgreSQL.
