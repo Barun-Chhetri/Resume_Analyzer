@@ -8,7 +8,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/contacts")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(originPatterns = "*")
 public class ContactController {
     private final ContactRepository contactRepository;
 

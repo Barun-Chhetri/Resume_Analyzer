@@ -19,7 +19,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/jobs")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"})
+@CrossOrigin(originPatterns = "*")
 @Tag(name = "Job Management", description = "Endpoints for creating, uploading, and managing job postings")
 public class JobPostingController {
 

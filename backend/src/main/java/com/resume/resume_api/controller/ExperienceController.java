@@ -8,7 +8,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/experiences")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(originPatterns = "*")
 public class ExperienceController {
     private final ExperienceRepository experienceRepository;
 

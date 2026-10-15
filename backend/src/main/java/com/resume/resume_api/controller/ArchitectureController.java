@@ -21,7 +21,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/architecture")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"})
+@CrossOrigin(originPatterns = "*")
 @Tag(name = "System Architecture", description = "Endpoints exposing system design metadata, vector database configuration, and RAG pipeline diagnostics")
 public class ArchitectureController {
 

@@ -16,7 +16,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/analyses")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"})
+@CrossOrigin(originPatterns = "*")
 @Tag(name = "Analysis & Matching", description = "Endpoints for analyzing resumes against job descriptions, skill matching, gap analysis, and RAG recommendations")
 public class AnalysisController {
 

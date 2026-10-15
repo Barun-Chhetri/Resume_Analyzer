@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"})
+@CrossOrigin(originPatterns = "*")
 @Tag(name = "Skill Intelligence Explorer", description = "Endpoints for exploring normalized canonical skills, aliases, and semantic skill search")
 public class SkillExplorerController {
 
