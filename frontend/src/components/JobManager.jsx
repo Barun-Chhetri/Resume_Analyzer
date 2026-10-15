@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 
-const JobManager = () => {
+const JobManager = ({ user, onOpenAuthModal }) => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -34,7 +34,7 @@ const JobManager = () => {
 
   useEffect(() => {
     loadJobs();
-  }, []);
+  }, [user]);
 
   const loadJobs = async () => {
     setLoading(true);
@@ -50,6 +50,11 @@ const JobManager = () => {
 
   const handleCreateJob = async (e) => {
     e.preventDefault();
+    if (!user) {
+      setErrorMsg('Please sign in to save and manage target job postings.');
+      onOpenAuthModal?.();
+      return;
+    }
     if (!rawText.trim()) {
       setErrorMsg('Job description text cannot be blank.');
       return;
@@ -150,6 +155,21 @@ Preferred Skills:
 
   return (
     <div className="container py-4">
+      {!user && (
+        <div className="alert alert-info d-flex flex-wrap align-items-center justify-content-between p-3 mb-4 glass-panel border-info border-opacity-25 gap-2" style={{ borderRadius: '12px' }}>
+          <div className="d-flex align-items-center gap-2">
+            <Sparkles size={18} className="text-info flex-shrink-0" />
+            <div>
+              <strong className="d-block text-light" style={{ fontSize: '0.95rem' }}>Personalized Job Repository</strong>
+              <span className="small text-secondary">Sign in to store and manage your target company job descriptions across sessions.</span>
+            </div>
+          </div>
+          <button className="btn btn-primary btn-sm px-3 py-1 fw-semibold flex-shrink-0" onClick={onOpenAuthModal}>
+            Sign In / Register
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>

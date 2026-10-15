@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 
-const AnalysisView = ({ initialAnalysisId }) => {
+const AnalysisView = ({ initialAnalysisId, user, onOpenAuthModal }) => {
   const [resumes, setResumes] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [selectedResumeId, setSelectedResumeId] = useState('');
@@ -36,7 +36,7 @@ const AnalysisView = ({ initialAnalysisId }) => {
     if (initialAnalysisId) {
       loadAnalysis(initialAnalysisId);
     }
-  }, [initialAnalysisId]);
+  }, [initialAnalysisId, user]);
 
   const loadSelectors = async () => {
     try {
@@ -68,6 +68,11 @@ const AnalysisView = ({ initialAnalysisId }) => {
   };
 
   const handleRunAnalysis = async () => {
+    if (!user) {
+      setErrorMsg('Please sign in to execute and persist personalized AI match analyses.');
+      onOpenAuthModal?.();
+      return;
+    }
     if (!selectedResumeId || !selectedJobId) {
       setErrorMsg('Please select both a resume and a job description.');
       return;
@@ -86,6 +91,21 @@ const AnalysisView = ({ initialAnalysisId }) => {
 
   return (
     <div className="container py-4">
+      {!user && (
+        <div className="alert alert-info d-flex flex-wrap align-items-center justify-content-between p-3 mb-4 glass-panel border-info border-opacity-25 gap-2" style={{ borderRadius: '12px' }}>
+          <div className="d-flex align-items-center gap-2">
+            <Cpu size={18} className="text-info flex-shrink-0" />
+            <div>
+              <strong className="d-block text-light" style={{ fontSize: '0.95rem' }}>AI Matching Engine</strong>
+              <span className="small text-secondary">Sign in to run and save multi-dimensional candidate analyses and grounded RAG recommendations.</span>
+            </div>
+          </div>
+          <button className="btn btn-primary btn-sm px-3 py-1 fw-semibold flex-shrink-0" onClick={onOpenAuthModal}>
+            Sign In / Register
+          </button>
+        </div>
+      )}
+
       {/* Selector & Action Bar */}
       <div className="glass-panel p-3 p-md-4 mb-4">
         <div className="row g-3 align-items-end">

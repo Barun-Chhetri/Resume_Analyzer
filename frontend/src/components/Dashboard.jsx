@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 
-const Dashboard = ({ onNavigateToAnalysis, onSelectAnalysis, onUploadResume, onCreateJob }) => {
+const Dashboard = ({ user, onOpenAuthModal, onNavigateToAnalysis, onSelectAnalysis, onUploadResume, onCreateJob }) => {
   const [resumes, setResumes] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [analyses, setAnalyses] = useState([]);
@@ -27,7 +27,7 @@ const Dashboard = ({ onNavigateToAnalysis, onSelectAnalysis, onUploadResume, onC
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+  }, [user]);
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -73,6 +73,21 @@ const Dashboard = ({ onNavigateToAnalysis, onSelectAnalysis, onUploadResume, onC
 
   return (
     <div className="container py-4">
+      {!user && (
+        <div className="alert alert-info d-flex flex-wrap align-items-center justify-content-between p-3 mb-4 glass-panel border-info border-opacity-25 gap-2" style={{ borderRadius: '12px' }}>
+          <div className="d-flex align-items-center gap-2">
+            <Sparkles size={18} className="text-info flex-shrink-0" />
+            <div>
+              <strong className="d-block text-light" style={{ fontSize: '0.95rem' }}>Sign in to save your personal session</strong>
+              <span className="small text-secondary">Log in to keep your uploaded resumes, job postings, and AI match analyses scoped to your own account.</span>
+            </div>
+          </div>
+          <button className="btn btn-primary btn-sm px-3 py-1 fw-semibold flex-shrink-0" onClick={onOpenAuthModal}>
+            Sign In / Register
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>

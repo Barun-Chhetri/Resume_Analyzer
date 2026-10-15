@@ -11,6 +11,7 @@ import com.resume.resume_api.ingestion.DocumentParserService;
 import com.resume.resume_api.ingestion.ResumeParserService;
 import com.resume.resume_api.repository.CanonicalSkillRepository;
 import com.resume.resume_api.repository.ResumeRepository;
+import com.resume.resume_api.security.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -63,6 +64,7 @@ public class ResumeIngestionService {
                 .location(profile.getLocation())
                 .summary(profile.getSummary())
                 .parsedJson(profile.getParsedJson())
+                .user(UserContext.getCurrentUser())
                 .build();
 
         // 1. Process and embed sections for RAG chunk retrieval

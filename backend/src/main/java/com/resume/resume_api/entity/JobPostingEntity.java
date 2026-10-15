@@ -43,6 +43,10 @@ public class JobPostingEntity {
     @Column(name = "parsed_json", columnDefinition = "TEXT")
     private String parsedJson;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
+
     @Builder.Default
     @OneToMany(mappedBy = "jobPosting", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<JobSkillEntity> skills = new ArrayList<>();

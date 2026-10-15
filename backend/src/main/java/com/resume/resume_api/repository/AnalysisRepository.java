@@ -4,11 +4,14 @@ import com.resume.resume_api.entity.AnalysisEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface AnalysisRepository extends JpaRepository<AnalysisEntity, UUID> {
     List<AnalysisEntity> findAllByOrderByCreatedAtDesc();
+    List<AnalysisEntity> findAllByUserIdOrderByCreatedAtDesc(UUID userId);
+    Optional<AnalysisEntity> findByIdAndUserId(UUID id, UUID userId);
     List<AnalysisEntity> findByResumeIdOrderByCreatedAtDesc(UUID resumeId);
     List<AnalysisEntity> findByJobPostingIdOrderByCreatedAtDesc(UUID jobId);
 }

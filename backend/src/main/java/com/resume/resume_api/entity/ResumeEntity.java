@@ -43,6 +43,10 @@ public class ResumeEntity {
     @Column(name = "parsed_json", columnDefinition = "TEXT")
     private String parsedJson;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
+
     @Builder.Default
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ResumeSectionEntity> sections = new ArrayList<>();

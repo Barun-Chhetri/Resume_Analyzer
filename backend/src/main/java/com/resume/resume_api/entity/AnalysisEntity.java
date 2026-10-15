@@ -26,6 +26,10 @@ public class AnalysisEntity {
     @JoinColumn(name = "job_id", nullable = false)
     private JobPostingEntity jobPosting;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
+
     @Column(name = "overall_match_score", nullable = false)
     private Double overallMatchScore;
 

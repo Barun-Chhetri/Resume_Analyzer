@@ -11,11 +11,65 @@ const client = axios.create({
   },
 });
 
+// Request interceptor: attach bearer token from localStorage
+client.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => Promise.reject(error));
+
+// Response interceptor: auto-logout on unauthorized
+client.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      window.dispatchEvent(new Event('auth_changed'));
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const api = {
-  // Legacy Portfolio Resume
-  getLegacyResume: async () => {
-    const res = await client.get('/api/resume');
+  // Authentication & Session
+  login: async (email, password) => {
+    const res = await client.post('/api/auth/login', { email, password });
+    if (res.data && res.data.token) {
+      localStorage.setItem('auth_token', res.data.token);
+      localStorage.setItem('auth_user', JSON.stringify(res.data.user));
+      window.dispatchEvent(new Event('auth_changed'));
+    }
     return res.data;
+  },
+
+  register: async (name, email, password) => {
+    const res = await client.post('/api/auth/register', { name, email, password });
+    if (res.data && res.data.token) {
+      localStorage.setItem('auth_token', res.data.token);
+      localStorage.setItem('auth_user', JSON.stringify(res.data.user));
+      window.dispatchEvent(new Event('auth_changed'));
+    }
+    return res.data;
+  },
+
+  getCurrentUser: async () => {
+    const res = await client.get('/api/auth/me');
+    return res.data;
+  },
+
+  logout: async () => {
+    try {
+      await client.post('/api/auth/logout');
+    } catch {
+      // ignore
+    } finally {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      window.dispatchEvent(new Event('auth_changed'));
+    }
   },
 
   // Resumes

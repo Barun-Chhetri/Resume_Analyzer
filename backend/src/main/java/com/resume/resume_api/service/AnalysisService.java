@@ -4,9 +4,11 @@ import com.resume.resume_api.ai.AiRecommendationEngine;
 import com.resume.resume_api.dto.AnalysisRequest;
 import com.resume.resume_api.dto.AnalysisResponseDTO;
 import com.resume.resume_api.entity.*;
+import com.resume.resume_api.entity.UserEntity;
 import com.resume.resume_api.exception.ResourceNotFoundException;
 import com.resume.resume_api.matching.SkillGapAnalysisService;
 import com.resume.resume_api.repository.*;
+import com.resume.resume_api.security.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,8 @@ public class AnalysisService {
         log.info("Running Resume Intelligence Analysis between Resume '{}' and Job '{}'",
                 resume.getCandidateName(), job.getTitle());
 
+        UserEntity currentUser = UserContext.getCurrentUser();
+
         // 1. Perform Multi-dimensional Gap Analysis
         SkillGapAnalysisService.AnalysisResultSummary summary = gapAnalysisService.performGapAnalysis(
                 resume, job, job.getSkills(), resume.getSkills()
@@ -58,6 +62,7 @@ public class AnalysisService {
                 .educationAlignmentScore(summary.getEducationAlignment())
                 .summary(summary.getExecutiveSummary())
                 .status("COMPLETED")
+                .user(currentUser)
                 .build();
 
         // 3. Attach Matches
@@ -97,23 +102,43 @@ public class AnalysisService {
 
     @Transactional(readOnly = true)
     public List<AnalysisResponseDTO> getAllAnalyses() {
-        return analysisRepository.findAllByOrderByCreatedAtDesc()
-                .stream()
+        UserEntity currentUser = UserContext.getCurrentUser();
+        List<AnalysisEntity> list;
+        if (currentUser != null) {
+            list = analysisRepository.findAllByUserIdOrderByCreatedAtDesc(currentUser.getId());
+        } else {
+            list = analysisRepository.findAllByOrderByCreatedAtDesc();
+        }
+        return list.stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public AnalysisResponseDTO getAnalysisById(UUID id) {
-        AnalysisEntity analysis = analysisRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
+        UserEntity currentUser = UserContext.getCurrentUser();
+        AnalysisEntity analysis;
+        if (currentUser != null) {
+            analysis = analysisRepository.findByIdAndUserId(id, currentUser.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
+        } else {
+            analysis = analysisRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
+        }
         return mapToDTO(analysis);
     }
 
     @Transactional(readOnly = true)
     public List<AnalysisResponseDTO.SkillMatchDTO> getAnalysisSkills(UUID id) {
-        AnalysisEntity analysis = analysisRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
+        UserEntity currentUser = UserContext.getCurrentUser();
+        AnalysisEntity analysis;
+        if (currentUser != null) {
+            analysis = analysisRepository.findByIdAndUserId(id, currentUser.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
+        } else {
+            analysis = analysisRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
+        }
         return analysis.getSkillMatches().stream()
                 .map(this::mapMatchToDTO)
                 .collect(Collectors.toList());
@@ -121,8 +146,15 @@ public class AnalysisService {
 
     @Transactional(readOnly = true)
     public List<AnalysisResponseDTO.SkillGapDTO> getAnalysisGaps(UUID id) {
-        AnalysisEntity analysis = analysisRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
+        UserEntity currentUser = UserContext.getCurrentUser();
+        AnalysisEntity analysis;
+        if (currentUser != null) {
+            analysis = analysisRepository.findByIdAndUserId(id, currentUser.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
+        } else {
+            analysis = analysisRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
+        }
         return analysis.getSkillGaps().stream()
                 .map(this::mapGapToDTO)
                 .collect(Collectors.toList());
@@ -130,8 +162,15 @@ public class AnalysisService {
 
     @Transactional(readOnly = true)
     public List<AnalysisResponseDTO.RecommendationDTO> getAnalysisRecommendations(UUID id) {
-        AnalysisEntity analysis = analysisRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
+        UserEntity currentUser = UserContext.getCurrentUser();
+        AnalysisEntity analysis;
+        if (currentUser != null) {
+            analysis = analysisRepository.findByIdAndUserId(id, currentUser.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
+        } else {
+            analysis = analysisRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Analysis not found with ID: " + id));
+        }
         return analysis.getRecommendations().stream()
                 .map(this::mapRecToDTO)
                 .collect(Collectors.toList());

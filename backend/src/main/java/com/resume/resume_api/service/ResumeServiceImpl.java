@@ -4,8 +4,10 @@ import com.resume.resume_api.dto.ResumeDTO;
 import com.resume.resume_api.dto.ResumeDetailDTO;
 import com.resume.resume_api.entity.ResumeEntity;
 import com.resume.resume_api.entity.ResumeSectionEntity;
+import com.resume.resume_api.entity.UserEntity;
 import com.resume.resume_api.exception.ResourceNotFoundException;
 import com.resume.resume_api.repository.*;
+import com.resume.resume_api.security.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,8 +41,14 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     @Transactional(readOnly = true)
     public List<ResumeDetailDTO> getAllResumes() {
-        return resumeRepository.findAllByOrderByCreatedAtDesc()
-                .stream()
+        UserEntity currentUser = UserContext.getCurrentUser();
+        List<ResumeEntity> list;
+        if (currentUser != null) {
+            list = resumeRepository.findAllByUserIdOrderByCreatedAtDesc(currentUser.getId());
+        } else {
+            list = resumeRepository.findAllByOrderByCreatedAtDesc();
+        }
+        return list.stream()
                 .map(this::mapToDetailDTO)
                 .collect(Collectors.toList());
     }
@@ -48,26 +56,47 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     @Transactional(readOnly = true)
     public ResumeDetailDTO getResumeDetailById(UUID id) {
-        ResumeEntity entity = resumeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Resume not found with ID: " + id));
+        UserEntity currentUser = UserContext.getCurrentUser();
+        ResumeEntity entity;
+        if (currentUser != null) {
+            entity = resumeRepository.findByIdAndUserId(id, currentUser.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Resume not found with ID: " + id));
+        } else {
+            entity = resumeRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Resume not found with ID: " + id));
+        }
         return mapToDetailDTO(entity);
     }
 
     @Override
     @Transactional
     public void deleteResume(UUID id) {
-        if (!resumeRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Resume not found with ID: " + id);
+        UserEntity currentUser = UserContext.getCurrentUser();
+        if (currentUser != null) {
+            ResumeEntity entity = resumeRepository.findByIdAndUserId(id, currentUser.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Resume not found with ID: " + id));
+            resumeRepository.delete(entity);
+        } else {
+            if (!resumeRepository.existsById(id)) {
+                throw new ResourceNotFoundException("Resume not found with ID: " + id);
+            }
+            resumeRepository.deleteById(id);
         }
-        resumeRepository.deleteById(id);
         log.info("Deleted Resume ID: {}", id);
     }
 
     @Override
     @Transactional
     public ResumeDetailDTO updateCandidateName(UUID id, String candidateName) {
-        ResumeEntity entity = resumeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Resume not found with ID: " + id));
+        UserEntity currentUser = UserContext.getCurrentUser();
+        ResumeEntity entity;
+        if (currentUser != null) {
+            entity = resumeRepository.findByIdAndUserId(id, currentUser.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Resume not found with ID: " + id));
+        } else {
+            entity = resumeRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Resume not found with ID: " + id));
+        }
         entity.setCandidateName(candidateName);
         ResumeEntity saved = resumeRepository.save(entity);
         return mapToDetailDTO(saved);

@@ -5,12 +5,14 @@ import com.resume.resume_api.dto.JobPostingRequest;
 import com.resume.resume_api.entity.CanonicalSkillEntity;
 import com.resume.resume_api.entity.JobPostingEntity;
 import com.resume.resume_api.entity.JobSkillEntity;
+import com.resume.resume_api.entity.UserEntity;
 import com.resume.resume_api.exception.InvalidInputException;
 import com.resume.resume_api.exception.ResourceNotFoundException;
 import com.resume.resume_api.ingestion.DocumentParserService;
 import com.resume.resume_api.ingestion.JobDescriptionParserService;
 import com.resume.resume_api.repository.CanonicalSkillRepository;
 import com.resume.resume_api.repository.JobPostingRepository;
+import com.resume.resume_api.security.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,8 @@ public class JobPostingService {
         JobDescriptionParserService.ParsedJobProfile profile =
                 jobParserService.parse(req.getTitle(), req.getCompany(), req.getRawText());
 
+        UserEntity currentUser = UserContext.getCurrentUser();
+
         JobPostingEntity job = JobPostingEntity.builder()
                 .title(profile.getTitle())
                 .company(profile.getCompany())
@@ -51,6 +55,7 @@ public class JobPostingService {
                 .requiredExperienceYears(profile.getRequiredExperienceYears())
                 .requiredDegree(profile.getRequiredDegree())
                 .parsedJson(profile.getParsedJson())
+                .user(currentUser)
                 .build();
 
         for (JobDescriptionParserService.ParsedJobSkill pSkill : profile.getExtractedSkills()) {
@@ -89,25 +94,45 @@ public class JobPostingService {
 
     @Transactional(readOnly = true)
     public List<JobPostingDTO> getAllJobPostings() {
-        return jobPostingRepository.findAllByOrderByCreatedAtDesc()
-                .stream()
+        UserEntity currentUser = UserContext.getCurrentUser();
+        List<JobPostingEntity> list;
+        if (currentUser != null) {
+            list = jobPostingRepository.findAllByUserIdOrderByCreatedAtDesc(currentUser.getId());
+        } else {
+            list = jobPostingRepository.findAllByOrderByCreatedAtDesc();
+        }
+        return list.stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public JobPostingDTO getJobPostingById(UUID id) {
-        JobPostingEntity job = jobPostingRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Job posting not found with ID: " + id));
+        UserEntity currentUser = UserContext.getCurrentUser();
+        JobPostingEntity job;
+        if (currentUser != null) {
+            job = jobPostingRepository.findByIdAndUserId(id, currentUser.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Job posting not found with ID: " + id));
+        } else {
+            job = jobPostingRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Job posting not found with ID: " + id));
+        }
         return mapToDTO(job);
     }
 
     @Transactional
     public void deleteJobPosting(UUID id) {
-        if (!jobPostingRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Job posting not found with ID: " + id);
+        UserEntity currentUser = UserContext.getCurrentUser();
+        if (currentUser != null) {
+            JobPostingEntity job = jobPostingRepository.findByIdAndUserId(id, currentUser.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Job posting not found with ID: " + id));
+            jobPostingRepository.delete(job);
+        } else {
+            if (!jobPostingRepository.existsById(id)) {
+                throw new ResourceNotFoundException("Job posting not found with ID: " + id);
+            }
+            jobPostingRepository.deleteById(id);
         }
-        jobPostingRepository.deleteById(id);
         log.info("Deleted Job Posting ID: {}", id);
     }
 

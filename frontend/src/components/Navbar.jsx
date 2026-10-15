@@ -4,18 +4,18 @@ import {
   FileText, 
   Briefcase, 
   Cpu, 
-  Database, 
   Search, 
   LayoutDashboard, 
   Sun, 
   Moon, 
-  CheckCircle2, 
-  UserCircle2,
-  Layers
+  Layers,
+  LogIn,
+  LogOut,
+  UserCheck
 } from 'lucide-react';
 import api from '../services/api';
 
-const Navbar = ({ activeTab, setActiveTab, darkMode, toggleDarkMode }) => {
+const Navbar = ({ activeTab, setActiveTab, darkMode, toggleDarkMode, user, onOpenAuthModal, onLogout }) => {
   const [backendOnline, setBackendOnline] = useState(false);
 
   useEffect(() => {
@@ -37,8 +37,16 @@ const Navbar = ({ activeTab, setActiveTab, darkMode, toggleDarkMode }) => {
     { id: 'analysis', label: 'Analyze', icon: Cpu },
     { id: 'skills', label: 'Skill Explorer', icon: Search },
     { id: 'architecture', label: 'Architecture', icon: Layers },
-    { id: 'my-resume', label: 'My Profile', icon: UserCircle2 },
   ];
+
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return parts[0].substring(0, 2).toUpperCase();
+  };
 
   return (
     <nav className="app-navbar py-2 px-3 px-md-4">
@@ -92,8 +100,47 @@ const Navbar = ({ activeTab, setActiveTab, darkMode, toggleDarkMode }) => {
           })}
         </div>
 
-        {/* Right Controls: Health & Theme Toggle */}
+        {/* Right Controls: User Profile / Auth, Health, Theme Toggle */}
         <div className="d-flex align-items-center gap-2">
+          {/* User Auth Control */}
+          {user ? (
+            <div className="d-flex align-items-center gap-2 bg-dark bg-opacity-25 px-2 py-1 border border-secondary border-opacity-25" style={{ borderRadius: '999px' }}>
+              <div 
+                className="d-flex align-items-center justify-content-center text-white fw-bold shadow-sm"
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)',
+                  fontSize: '0.75rem'
+                }}
+                title={user.email}
+              >
+                {getInitials(user.name)}
+              </div>
+              <span className="d-none d-md-inline small fw-semibold text-light pe-1" style={{ maxWidth: '120px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {user.name}
+              </span>
+              <button
+                className="btn btn-sm btn-link text-danger p-0 d-flex align-items-center"
+                onClick={onLogout}
+                title="Sign Out"
+                style={{ textDecoration: 'none' }}
+              >
+                <LogOut size={15} />
+              </button>
+            </div>
+          ) : (
+            <button
+              className="btn btn-primary btn-sm d-flex align-items-center gap-1 px-3 py-1 shadow-sm fw-semibold"
+              onClick={onOpenAuthModal}
+              style={{ borderRadius: '8px' }}
+            >
+              <LogIn size={15} />
+              <span>Sign In</span>
+            </button>
+          )}
+
           {/* Backend Status Pill */}
           <div 
             className="d-flex align-items-center gap-1 px-2 py-1"
@@ -115,7 +162,7 @@ const Navbar = ({ activeTab, setActiveTab, darkMode, toggleDarkMode }) => {
                 boxShadow: backendOnline ? '0 0 6px #10b981' : 'none'
               }} 
             />
-            <span className="d-none d-sm-inline">{backendOnline ? 'API Connected' : 'Connecting'}</span>
+            <span className="d-none d-lg-inline">{backendOnline ? 'API Connected' : 'Connecting'}</span>
           </div>
 
           {/* Theme Toggle */}

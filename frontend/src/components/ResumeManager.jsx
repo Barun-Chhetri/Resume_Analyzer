@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 
-const ResumeManager = () => {
+const ResumeManager = ({ user, onOpenAuthModal }) => {
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -35,7 +35,7 @@ const ResumeManager = () => {
 
   useEffect(() => {
     loadResumes();
-  }, []);
+  }, [user]);
 
   const loadResumes = async () => {
     setLoading(true);
@@ -51,6 +51,11 @@ const ResumeManager = () => {
 
   const handleFileUpload = async (e) => {
     e.preventDefault();
+    if (!user) {
+      setErrorMsg('Please sign in to upload and store your private resumes.');
+      onOpenAuthModal?.();
+      return;
+    }
     setErrorMsg('');
     setSuccessMsg('');
     setUploading(true);
@@ -99,11 +104,11 @@ const ResumeManager = () => {
 
   const handleLoadSample = () => {
     setPasteMode(true);
-    setCandidateNameInput('Barun Chhetri');
-    setRawTextInput(`BARUN CHHETRI
+    setCandidateNameInput('Alex Morgan');
+    setRawTextInput(`ALEX MORGAN
 Fullstack Developer & AI Engineer
-barun.chhetri@example.com | +1 (555) 019-2834 | Dallas-Fort Worth, TX
-GitHub: https://github.com/barunchhetri | LinkedIn: linkedin.com/in/barunchhetri
+alex.morgan@example.com | +1 (555) 019-2834 | Dallas-Fort Worth, TX
+GitHub: https://github.com/alexmorgan-dev | LinkedIn: linkedin.com/in/alexmorgan
 
 PROFESSIONAL SUMMARY
 Results-driven Software Engineer with extensive experience building scalable Java and Spring Boot microservices, high-performance PostgreSQL and PGVector architectures, and RAG-grounded AI applications. Demonstrated record of delivering production-ready distributed systems.
@@ -137,6 +142,21 @@ Coursework: Data Structures & Algorithms, Database Systems, Operating Systems, S
 
   return (
     <div className="container py-4">
+      {!user && (
+        <div className="alert alert-info d-flex flex-wrap align-items-center justify-content-between p-3 mb-4 glass-panel border-info border-opacity-25 gap-2" style={{ borderRadius: '12px' }}>
+          <div className="d-flex align-items-center gap-2">
+            <Sparkles size={18} className="text-info flex-shrink-0" />
+            <div>
+              <strong className="d-block text-light" style={{ fontSize: '0.95rem' }}>Personalized Resume Vault</strong>
+              <span className="small text-secondary">Sign in to upload, embed, and securely store your private candidate resumes.</span>
+            </div>
+          </div>
+          <button className="btn btn-primary btn-sm px-3 py-1 fw-semibold flex-shrink-0" onClick={onOpenAuthModal}>
+            Sign In / Register
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
@@ -181,7 +201,7 @@ Coursework: Data Structures & Algorithms, Database Systems, Operating Systems, S
             </button>
             <button className="btn-secondary-custom" onClick={() => { setShowUploadModal(true); handleLoadSample(); }}>
               <Sparkles size={16} />
-              <span>Load Barun Chhetri Sample</span>
+              <span>Load Sample Resume</span>
             </button>
           </div>
         </div>
@@ -271,7 +291,7 @@ Coursework: Data Structures & Algorithms, Database Systems, Operating Systems, S
                       className="btn btn-sm btn-outline-info ms-auto"
                       onClick={handleLoadSample}
                     >
-                      <Sparkles size={14} className="me-1" /> Load Barun Chhetri Sample
+                      <Sparkles size={14} className="me-1" /> Load Sample Resume
                     </button>
                   </div>
 
@@ -295,7 +315,7 @@ Coursework: Data Structures & Algorithms, Database Systems, Operating Systems, S
                         <input 
                           type="text" 
                           className="form-control bg-tertiary text-primary border-subtle"
-                          placeholder="e.g. Barun Chhetri"
+                          placeholder="e.g. Alex Morgan"
                           value={candidateNameInput}
                           onChange={(e) => setCandidateNameInput(e.target.value)}
                         />

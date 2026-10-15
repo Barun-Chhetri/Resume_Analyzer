@@ -18,9 +18,9 @@ public class OpenApiConfig {
                         .version("1.0.0")
                         .description("Production-grade AI Resume Intelligence Platform built with Java 21, Spring Boot, Spring AI, PostgreSQL, PGVector, and RAG architecture. Ingests resumes (PDF, DOCX, TXT), normalizes technical skills to canonical taxonomies, generates 1536-dimensional dense vector embeddings, performs semantic similarity matching against job requirements, identifies skill gaps, and synthesizes grounded recommendations.")
                         .contact(new Contact()
-                                .name("Barun Chhetri")
-                                .email("barun.chhetri@example.com")
-                                .url("https://github.com/barunchhetri"))
+                                .name("Resume Intelligence Platform Support")
+                                .email("support@barunchamlagain.me")
+                                .url("https://resume-analyzer.barunchamlagain.me"))
                         .license(new License().name("Apache 2.0").url("https://www.apache.org/licenses/LICENSE-2.0")));
     }
 }

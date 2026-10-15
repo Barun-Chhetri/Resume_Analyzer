@@ -30,11 +30,11 @@ public class DevDataInitializer implements CommandLineRunner {
         if (contactRepo.count() == 0) {
             Contact contact = new Contact(
                     null,
-                    "Barun Chhetri",
-                    "Fullstack Developer & AI Engineer",
+                    "Alex Morgan",
+                    "Senior Fullstack & AI Cloud Engineer",
                     "+1 (555) 019-2834",
-                    "barun.chhetri@example.com",
-                    "https://github.com/barunchhetri",
+                    "alex.morgan@example.com",
+                    "https://github.com/example",
                     "Dallas-Fort Worth, TX",
                     "Passionate Software Engineer skilled in Java, Spring Boot, Spring AI, PostgreSQL, and scalable web architectures."
             );
